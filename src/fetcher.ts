@@ -1,4 +1,4 @@
-import { Mutable, Async, MutableOptions } from "./mutable";
+import { MutableBase, Async, MutableOptions, Resolver } from ".";
 
 export interface FetcherOptions<T> extends MutableOptions<T> {
   /**
@@ -8,8 +8,11 @@ export interface FetcherOptions<T> extends MutableOptions<T> {
   lazy?: boolean;
 }
 
-export class Fetcher<T> extends Mutable<T> {
-  constructor(readonly fetch: () => Async<T>, options: FetcherOptions<T> = {}) {
+export class Fetcher<T> extends Resolver<T> {
+  constructor(
+    readonly fetch: () => Async<T | MutableBase<T>>,
+    options: FetcherOptions<T> = {}
+  ) {
     super(options);
 
     const { lazy = true } = options;
@@ -22,9 +25,9 @@ export class Fetcher<T> extends Mutable<T> {
 
   async refresh() {
     try {
-      this.value(await this.fetch());
+      this._resolve(await this.fetch());
     } catch (error) {
-      this.error(error);
+      this._setError(error);
     }
   }
 }
