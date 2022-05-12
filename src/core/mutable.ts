@@ -1,5 +1,5 @@
 import { TypedEmitter } from "tiny-typed-emitter";
-import { Mutable, Transformer, Resolver } from ".";
+import { Transformer, Resolver } from ".";
 
 export type Async<T> = T | Promise<T>;
 
@@ -51,7 +51,7 @@ export type PublicEvents<T> = Omit<
 
 export interface MutableOptions<T> {
   initialValue?: T;
-  compare?: (a: T, b: T) => number;
+  equals?: (a: T, b: T) => boolean;
 }
 
 export enum MutableState {
@@ -60,7 +60,7 @@ export enum MutableState {
   Rejected,
 }
 
-export class MutableBase<T> {
+export class Mutable<T> {
   private _emitter = new TypedEmitter<MutableEvents<T>>();
 
   private _internal:
@@ -78,6 +78,9 @@ export class MutableBase<T> {
         state: MutableState.Resolved,
         value: options.initialValue!,
       };
+    }
+    if ("equals" in options) {
+      this._equals = options.equals!;
     }
 
     this._emitter.on("newListener", (eventName, listener) => {
@@ -128,10 +131,12 @@ export class MutableBase<T> {
     this._emitter.off(eventName, listener);
   }
 
+  private _equals: (a: T, b: T) => boolean = (a, b) => a === b;
+
   protected _setValue(value: T) {
     if (
       this._internal.state !== MutableState.Resolved ||
-      JSON.stringify(this._internal.value) !== JSON.stringify(value)
+      !this._equals(this._internal.value, value)
     ) {
       this._emitter.emit("value", value);
     }
@@ -144,25 +149,7 @@ export class MutableBase<T> {
     this._internal = { state: MutableState.Rejected, error };
   }
 
-  bind<U>(
-    transform: (value: T) => Async<U | MutableBase<U>>
-  ): Transformer<T, U> {
+  bind<U>(transform: (value: T) => Async<U | Mutable<U>>): Transformer<T, U> {
     return new Transformer(this, transform);
-  }
-
-  static resolve<T>(value: T | MutableBase<T>) {
-    return new Resolver({ source: value });
-  }
-
-  static all<T extends any[] | readonly any[]>(mutables: T) {
-    return mutables.reduce(
-      (acc, val) =>
-        acc.bind((arr: any[]) =>
-          MutableBase.resolve(val).bind((rval) => [...arr, rval])
-        ),
-      new Mutable({ initialValue: [] })
-    ) as MutableBase<{
-      [K in keyof T]: T[K] extends MutableBase<infer S> ? S : T[K];
-    }>;
   }
 }

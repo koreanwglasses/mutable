@@ -1,10 +1,10 @@
-import { MutableBase, MutableOptions } from "./base";
+import { Mutable, MutableOptions } from "./mutable";
 
 export interface ResolverOptions<T> extends MutableOptions<T> {
-  source?: T | MutableBase<T>;
+  source?: T | Mutable<T>;
 }
 
-export class Resolver<T> extends MutableBase<T> {
+export class Resolver<T> extends Mutable<T> {
   constructor(options: ResolverOptions<T> = {}) {
     super(options);
 
@@ -14,6 +14,7 @@ export class Resolver<T> extends MutableBase<T> {
     this.on("detach", () => {
       this._source?.off("value", this._setValue);
       this._source?.off("error", this._setError);
+      this._source = undefined;
     });
 
     if ("source" in options) {
@@ -21,9 +22,9 @@ export class Resolver<T> extends MutableBase<T> {
     }
   }
 
-  private _source?: MutableBase<T>;
-  protected _resolve(value: T | MutableBase<T>) {
-    if (value instanceof MutableBase) {
+  private _source?: Mutable<T>;
+  protected _resolve(value: T | Mutable<T>) {
+    if (value instanceof Mutable) {
       if (this._source !== value) {
         this._source?.off("value", this._setValue);
         this._source?.off("error", this._setError);

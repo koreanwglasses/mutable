@@ -1,5 +1,2 @@
-export * from "./base";
-export * from "./resolver";
+export type { Mutable } from "./core";
 export * from "./mutable";
-export * from "./fetcher";
-export * from "./transformer";

@@ -1,9 +1,9 @@
-import { MutableBase, Async, MutableEvents, MutableOptions, Resolver } from ".";
+import { Mutable, Async, MutableEvents, MutableOptions, Resolver } from ".";
 
 export class Transformer<S, T> extends Resolver<T> {
   constructor(
-    readonly source: MutableBase<S>,
-    readonly transform: (value: S) => Async<T | MutableBase<T>>,
+    readonly source: Mutable<S>,
+    readonly transform: (value: S) => Async<T | Mutable<T>>,
     options?: MutableOptions<T>
   ) {
     super(options);

@@ -1,4 +1,4 @@
-import { MutableBase, Async, MutableOptions, Resolver } from ".";
+import { Mutable, Async, MutableOptions, Resolver } from ".";
 
 export interface FetcherOptions<T> extends MutableOptions<T> {
   /**
@@ -10,7 +10,7 @@ export interface FetcherOptions<T> extends MutableOptions<T> {
 
 export class Fetcher<T> extends Resolver<T> {
   constructor(
-    readonly fetch: () => Async<T | MutableBase<T>>,
+    readonly fetch: () => Async<T | Mutable<T>>,
     options: FetcherOptions<T> = {}
   ) {
     super(options);
