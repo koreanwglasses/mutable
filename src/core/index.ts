@@ -1,4 +1,4 @@
 export * from "./mutable";
-export * from "./resolver";
+export * from "./proxy";
 export * from "./fetcher";
 export * from "./transformer";

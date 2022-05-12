@@ -1,16 +1,25 @@
-import { Mutable, Async, MutableEvents, MutableOptions, Resolver } from ".";
+import { Mutable, Async, MutableEvents, MutableOptions, Proxy } from ".";
 
-export class Transformer<S, T> extends Resolver<T> {
+export interface TransformerOptions<T> extends MutableOptions<T> {
+  /**
+   * By default, a transformer only executes `transform` once a client
+   * is attached. To compute as soon as `source` resolves, set `lazy` to false
+   */
+  lazy?: boolean;
+}
+
+export class Transformer<S, T> extends Proxy<T> {
   constructor(
     readonly source: Mutable<S>,
     readonly transform: (value: S) => Async<T | Mutable<T>>,
-    options?: MutableOptions<T>
+    options: TransformerOptions<T> = {}
   ) {
     super(options);
+    const { lazy = true } = options;
 
     const valueListener: MutableEvents<S>["value"] = async (value) => {
       try {
-        this._resolve(await this.transform(value));
+        this._resolveTo(await this.transform(value));
       } catch (error) {
         this._setError(error);
       }
@@ -28,5 +37,9 @@ export class Transformer<S, T> extends Resolver<T> {
       this.source.off("value", valueListener);
       this.source.off("error", errorListener);
     });
+
+    if (!lazy) {
+      this.source.once("value", valueListener);
+    }
   }
 }

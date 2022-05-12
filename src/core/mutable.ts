@@ -1,5 +1,5 @@
 import { TypedEmitter } from "tiny-typed-emitter";
-import { Transformer, Resolver } from ".";
+import { Transformer, TransformerOptions } from ".";
 
 export type Async<T> = T | Promise<T>;
 
@@ -149,7 +149,10 @@ export class Mutable<T> {
     this._internal = { state: MutableState.Rejected, error };
   }
 
-  bind<U>(transform: (value: T) => Async<U | Mutable<U>>): Transformer<T, U> {
-    return new Transformer(this, transform);
+  bind<U>(
+    transform: (value: T) => Async<U | Mutable<U>>,
+    options?: TransformerOptions<U>
+  ): Transformer<T, U> {
+    return new Transformer(this, transform, options);
   }
 }
