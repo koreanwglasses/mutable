@@ -1,2 +1,2 @@
 export type { Mutable } from "./core";
-export * from "./mutable";
+export { mutable as default, MutableValue } from "./mutable";

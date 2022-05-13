@@ -131,6 +131,20 @@ export class Mutable<T> {
     this._emitter.off(eventName, listener);
   }
 
+  /**
+   * Alias for on('value', ...)
+   */
+  subscribe(listener: MutableEvents<T>["value"]) {
+    this.on("value", listener);
+  }
+
+  /**
+   * Alias for off('value', ...)
+   */
+  unsubscribe(listener: MutableEvents<T>["value"]) {
+    this.off("value", listener);
+  }
+
   private _equals: (a: T, b: T) => boolean = (a, b) => a === b;
 
   protected _setValue(value: T) {
